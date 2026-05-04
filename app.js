@@ -54,7 +54,6 @@ const sampleState = {
       mixerName: "Coca",
       mixerMl: 180,
       location: "Casa de Nico, alacena",
-      notes: "",
       updatedAt: Date.now() - 1000 * 60 * 34
     },
     {
@@ -69,7 +68,6 @@ const sampleState = {
       mixerName: "Tónica",
       mixerMl: 150,
       location: "Heladera grande",
-      notes: "",
       updatedAt: Date.now() - 1000 * 60 * 75
     },
     {
@@ -84,7 +82,6 @@ const sampleState = {
       mixerName: "",
       mixerMl: 0,
       location: "Heladera de abajo",
-      notes: "",
       updatedAt: Date.now() - 1000 * 60 * 140
     }
   ],
@@ -123,7 +120,6 @@ const els = {
   bottleMl: document.querySelector("#bottleMlInput"),
   servingMl: document.querySelector("#servingMlInput"),
   location: document.querySelector("#locationInput"),
-  notes: document.querySelector("#notesInput"),
   saveItem: document.querySelector("#saveItemBtn"),
   resetForm: document.querySelector("#resetFormBtn"),
   people: document.querySelector("#peopleInput"),
@@ -293,7 +289,6 @@ function saveForm() {
     mixerName: mixer.name,
     mixerMl: mixer.ml,
     location: els.location.value.trim(),
-    notes: els.notes.value.trim(),
     updatedAt: Date.now()
   };
 
@@ -340,7 +335,6 @@ function editItem(id) {
   els.bottleMl.value = item.bottleMl;
   els.servingMl.value = item.servingMl;
   els.location.value = item.location || "";
-  els.notes.value = item.notes || "";
   els.saveItem.textContent = "Guardar cambios";
   els.name.focus();
 }
@@ -410,7 +404,7 @@ function renderInventory() {
   const filter = els.filter.value;
   const items = state.items
     .filter((item) => filter === "all" || item.type === filter)
-    .filter((item) => [item.name, item.type, TYPE_LABELS[item.type], item.notes, item.location, item.mixerName].join(" ").toLowerCase().includes(search))
+    .filter((item) => [item.name, item.type, TYPE_LABELS[item.type], item.location, item.mixerName].join(" ").toLowerCase().includes(search))
     .sort((a, b) => drinkCount(a) - drinkCount(b) || a.name.localeCompare(b.name));
 
   els.stockSubtitle.textContent = `${items.length} visibles, ${state.items.length} cargadas`;
@@ -440,7 +434,6 @@ function renderInventory() {
           ${mixerNeeded ? `<span>${formatLiters(mixerNeeded)} de ${escapeHtml(item.mixerName)} para mezclar</span>` : ""}
           ${item.location ? `<span class="location-chip">${escapeHtml(item.location)}</span>` : ""}
           <span>hace ${relativeTime(item.updatedAt)}</span>
-          ${item.notes ? `<span>${escapeHtml(item.notes)}</span>` : ""}
         </div>
         <div class="item-progress ${ratio < 0.35 ? "low" : ""}">
           <div style="width: ${Math.min(100, Math.round(ratio * 100))}%"></div>
@@ -671,7 +664,6 @@ function normalizeItem(item) {
     mixerName: mixer.name,
     mixerMl: mixer.ml,
     location: String(item.location || "").slice(0, 60),
-    notes: String(item.notes || "").slice(0, 80),
     updatedAt: Number(item.updatedAt || Date.now())
   };
 }
