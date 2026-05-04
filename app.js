@@ -1,4 +1,5 @@
 const STORAGE_KEY = "reservas-state-v1";
+const MOBILE_TAB_KEY = "reservas-mobile-tab-v1";
 
 const TYPE_LABELS = {
   Fernet: "Fernet",
@@ -129,12 +130,16 @@ const els = {
   share: document.querySelector("#shareBtn"),
   export: document.querySelector("#exportBtn"),
   importFile: document.querySelector("#importFile"),
-  toast: document.querySelector("#toast")
+  toast: document.querySelector("#toast"),
+  mobilePanels: [...document.querySelectorAll("[data-mobile-tab-panel]")],
+  mobileTabButtons: [...document.querySelectorAll("[data-mobile-tab-target]")],
+  mobileJump: document.querySelector("[data-mobile-jump='cargar']")
 };
 
 let remote = null;
 let applyingRemote = false;
 let toastTimer = null;
+let activeMobileTab = "resumen";
 
 init();
 
@@ -142,7 +147,9 @@ async function init() {
   loadFromUrlSnapshot();
   loadLocalState();
   bindEvents();
+  setupMobileTabs();
   applyTypeDefaults();
+  registerServiceWorker();
   await setupBackend();
   render();
 }
@@ -176,6 +183,59 @@ function bindEvents() {
   els.share.addEventListener("click", copySnapshotLink);
   els.export.addEventListener("click", exportData);
   els.importFile.addEventListener("change", importData);
+}
+
+function setupMobileTabs() {
+  if (!els.mobilePanels.length || !els.mobileTabButtons.length) return;
+
+  const available = new Set(els.mobilePanels.map((panel) => panel.dataset.mobileTabPanel));
+  const saved = localStorage.getItem(MOBILE_TAB_KEY);
+  activeMobileTab = available.has(saved) ? saved : "resumen";
+  setMobileTab(activeMobileTab, { persist: false });
+
+  els.mobileTabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = button.dataset.mobileTabTarget;
+      if (!target) return;
+      setMobileTab(target);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  if (els.mobileJump) {
+    els.mobileJump.addEventListener("click", (event) => {
+      if (!window.matchMedia("(max-width: 860px)").matches) return;
+      event.preventDefault();
+      setMobileTab("cargar");
+      els.form.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+}
+
+function setMobileTab(tab, options = {}) {
+  const available = new Set(els.mobilePanels.map((panel) => panel.dataset.mobileTabPanel));
+  if (!available.has(tab)) return;
+
+  activeMobileTab = tab;
+  const persist = options.persist !== false;
+
+  els.mobilePanels.forEach((panel) => {
+    panel.classList.toggle("is-active", panel.dataset.mobileTabPanel === tab);
+  });
+
+  els.mobileTabButtons.forEach((button) => {
+    const isActive = button.dataset.mobileTabTarget === tab;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
+
+  if (persist) localStorage.setItem(MOBILE_TAB_KEY, tab);
+}
+
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  if (!window.isSecureContext) return;
+  navigator.serviceWorker.register("./sw.js").catch((error) => console.error("SW register failed", error));
 }
 
 async function setupBackend() {

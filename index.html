@@ -4,8 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#11130f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Reservas" />
     <title>Reservas - Bar de la banda</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='52'%3E%F0%9F%8D%BA%3C/text%3E%3C/svg%3E" />
+    <link rel="apple-touch-icon" sizes="192x192" href="./icons/icon-192.png" />
+    <link rel="manifest" href="./manifest.webmanifest?v=20260504-1" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -48,45 +53,47 @@
       </header>
 
       <main>
-        <section class="party-stage" aria-label="Resumen de la previa">
-          <div class="stage-copy">
-            <p class="eyebrow">Resumen de reservas</p>
-            <h2 id="totalDrinksHero">0 tragos listos</h2>
-            <p id="readinessCopy" class="stage-text">Cargá reservas para ver disponibilidad.</p>
-            <div class="stage-actions">
-              <a href="#itemForm" class="primary-link">Cargar botella</a>
-            </div>
-          </div>
-          <div class="bar-visual" aria-hidden="true">
-            <div class="beer-mug">
-              <div class="big-glass">
-                <div id="glassFill" class="glass-fill"></div>
+        <section class="mobile-tab-panel is-active" data-mobile-tab-panel="resumen">
+          <section class="party-stage" aria-label="Resumen de la previa">
+            <div class="stage-copy">
+              <p class="eyebrow">Resumen de reservas</p>
+              <h2 id="totalDrinksHero">0 tragos listos</h2>
+              <p id="readinessCopy" class="stage-text">Cargá reservas para ver disponibilidad.</p>
+              <div class="stage-actions">
+                <a href="#itemForm" data-mobile-jump="cargar" class="primary-link">Cargar botella</a>
               </div>
-              <div class="beer-handle"></div>
             </div>
-          </div>
-        </section>
+            <div class="bar-visual" aria-hidden="true">
+              <div class="beer-mug">
+                <div class="big-glass">
+                  <div id="glassFill" class="glass-fill"></div>
+                </div>
+                <div class="beer-handle"></div>
+              </div>
+            </div>
+          </section>
 
-        <section class="summary-grid" aria-label="Resumen de reservas">
-          <div class="summary-panel">
-            <p class="panel-label">Botellas equiv.</p>
-            <strong id="totalBottles">0.0</strong>
-            <span class="muted">sin contar mezcla</span>
-          </div>
-          <div class="summary-panel">
-            <p class="panel-label">Tragos</p>
-            <strong id="totalDrinks">0</strong>
-            <span class="muted">cerveza = 1, copa = 1</span>
-          </div>
-          <div class="summary-panel">
-            <p class="panel-label">Mezcla necesaria</p>
-            <strong id="mixGap">0 L</strong>
-            <span class="muted">coca, tónica, soda...</span>
-          </div>
+          <section class="summary-grid" aria-label="Resumen de reservas">
+            <div class="summary-panel">
+              <p class="panel-label">Botellas equiv.</p>
+              <strong id="totalBottles">0.0</strong>
+              <span class="muted">sin contar mezcla</span>
+            </div>
+            <div class="summary-panel">
+              <p class="panel-label">Tragos</p>
+              <strong id="totalDrinks">0</strong>
+              <span class="muted">cerveza = 1, copa = 1</span>
+            </div>
+            <div class="summary-panel">
+              <p class="panel-label">Mezcla necesaria</p>
+              <strong id="mixGap">0 L</strong>
+              <span class="muted">coca, tónica, soda...</span>
+            </div>
+          </section>
         </section>
 
         <section class="workspace">
-          <aside class="sidebar" aria-label="Controles">
+          <aside class="sidebar mobile-tab-panel" data-mobile-tab-panel="cargar" aria-label="Controles">
             <form id="itemForm" class="form-panel">
               <div class="form-heading">
                 <h2>Cargar reserva</h2>
@@ -163,7 +170,7 @@
             </section>
           </aside>
 
-          <section class="inventory-panel" aria-label="Inventario">
+          <section class="inventory-panel mobile-tab-panel" data-mobile-tab-panel="barra" aria-label="Inventario">
             <div class="inventory-toolbar">
               <div>
                 <h2>Barra</h2>
@@ -198,7 +205,7 @@
           </section>
         </section>
 
-        <section class="lower-grid">
+        <section class="lower-grid mobile-tab-panel" data-mobile-tab-panel="logs">
           <section class="activity-panel" aria-label="Actividad">
             <div class="section-heading">
               <h2>Últimos movimientos</h2>
@@ -223,8 +230,15 @@
       </main>
     </div>
 
+    <nav class="mobile-bottom-nav" aria-label="Navegación móvil">
+      <button class="mobile-nav-btn is-active" data-mobile-tab-target="resumen" type="button" aria-selected="true">Resumen</button>
+      <button class="mobile-nav-btn" data-mobile-tab-target="cargar" type="button" aria-selected="false">Cargar</button>
+      <button class="mobile-nav-btn" data-mobile-tab-target="barra" type="button" aria-selected="false">Barra</button>
+      <button class="mobile-nav-btn" data-mobile-tab-target="logs" type="button" aria-selected="false">Logs</button>
+    </nav>
+
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="./config.js?v=20260504-1"></script>
-    <script src="./app.js?v=20260504-3"></script>
+    <script src="./app.js?v=20260504-4"></script>
   </body>
 </html>
