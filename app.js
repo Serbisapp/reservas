@@ -8,8 +8,18 @@ const TYPE_LABELS = {
   Rum: "Ron",
   Wine: "Vino",
   Beer: "Cerveza",
-  Mixer: "Mezcla",
   Other: "Otro"
+};
+
+const TYPE_EMOJIS = {
+  Fernet: "🥃",
+  Gin: "🍸",
+  Vodka: "🍹",
+  Whisky: "🥃",
+  Rum: "🍹",
+  Wine: "🍷",
+  Beer: "🍺",
+  Other: "🍾"
 };
 
 const UNIT_LABELS = {
@@ -27,7 +37,6 @@ const DEFAULTS_BY_TYPE = {
   Rum: { servingMl: 50, mixerName: "Coca", mixerMl: 150, bottleMl: 750 },
   Wine: { servingMl: 150, mixerName: "", mixerMl: 0, bottleMl: 750 },
   Beer: { servingMl: 473, mixerName: "", mixerMl: 0, bottleMl: 473 },
-  Mixer: { servingMl: 200, mixerName: "", mixerMl: 0, bottleMl: 2250 },
   Other: { servingMl: 50, mixerName: "", mixerMl: 0, bottleMl: 750 }
 };
 
@@ -45,7 +54,7 @@ const sampleState = {
       mixerName: "Coca",
       mixerMl: 180,
       location: "Casa de Nico, alacena",
-      notes: "Regla de oro: sin coca no hay fernet",
+      notes: "",
       updatedAt: Date.now() - 1000 * 60 * 34
     },
     {
@@ -60,7 +69,7 @@ const sampleState = {
       mixerName: "Tónica",
       mixerMl: 150,
       location: "Heladera grande",
-      notes: "Para los que piden hielo prolijo",
+      notes: "",
       updatedAt: Date.now() - 1000 * 60 * 75
     },
     {
@@ -75,37 +84,7 @@ const sampleState = {
       mixerName: "",
       mixerMl: 0,
       location: "Heladera de abajo",
-      notes: "Cada lata cuenta como 1 trago",
-      updatedAt: Date.now() - 1000 * 60 * 95
-    },
-    {
-      id: crypto.randomUUID(),
-      name: "Coca",
-      type: "Mixer",
-      unit: "liters",
-      amount: 3,
-      target: 6,
-      bottleMl: 1000,
-      servingMl: 200,
-      mixerName: "",
-      mixerMl: 0,
-      location: "Cocina",
-      notes: "La mezcla que desaparece primero",
-      updatedAt: Date.now() - 1000 * 60 * 118
-    },
-    {
-      id: crypto.randomUUID(),
-      name: "Tónica",
-      type: "Mixer",
-      unit: "cans",
-      amount: 8,
-      target: 12,
-      bottleMl: 354,
-      servingMl: 177,
-      mixerName: "",
-      mixerMl: 0,
-      location: "Heladera grande",
-      notes: "Dos gin tonic por lata",
+      notes: "",
       updatedAt: Date.now() - 1000 * 60 * 140
     }
   ],
@@ -347,9 +326,6 @@ function applyTypeDefaults() {
   if (els.type.value === "Beer") {
     els.unit.value = "cans";
     els.target.value = "12";
-  } else if (els.type.value === "Mixer") {
-    els.unit.value = "liters";
-    els.target.value = "4";
   }
 }
 
@@ -398,6 +374,8 @@ function render() {
 
 function renderSummary() {
   const stats = getStats();
+  const plannedDrinks = Math.max(1, state.planner.people * state.planner.drinksEach);
+  const glassLevel = Math.min(100, Math.round(stats.totalDrinks / plannedDrinks * 100));
   const readiness = state.items.length
     ? Math.round(
         state.items.reduce((sum, item) => sum + Math.min(stockRatio(item), 1), 0) / state.items.length * 100
@@ -407,18 +385,17 @@ function renderSummary() {
   els.totalBottles.textContent = formatNumber(stats.totalBottles, 1);
   els.totalDrinks.textContent = stats.totalDrinks.toString();
   els.totalDrinksHero.textContent = stats.totalDrinks.toString();
-  els.mixGap.textContent = formatLiters(stats.mixerGapMl);
+  els.mixGap.textContent = formatLiters(stats.mixerNeededMl);
   els.mixHero.textContent = `Mezcla: ${formatLiters(stats.mixerNeededMl)} necesaria`;
   els.readinessScore.textContent = `${readiness}%`;
   els.readinessFill.style.width = `${readiness}%`;
-  els.glassFill.style.height = `${Math.min(100, readiness)}%`;
+  els.glassFill.style.height = `${glassLevel}%`;
   els.readinessCopy.textContent = readinessCopy(readiness, stats);
   renderVisualShelf();
 }
 
 function renderVisualShelf() {
   const topItems = state.items
-    .filter((item) => item.type !== "Mixer")
     .sort((a, b) => drinkCount(b) - drinkCount(a))
     .slice(0, 7);
 
@@ -458,13 +435,14 @@ function renderInventory() {
       </div>
       <div class="reserve-main">
         <div class="reserve-title">
+          <span class="drink-emoji" aria-hidden="true">${TYPE_EMOJIS[item.type] || TYPE_EMOJIS.Other}</span>
           <h3 title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</h3>
           <span class="type-pill">${escapeHtml(TYPE_LABELS[item.type] || item.type)}</span>
           ${ratio < 0.35 ? '<span class="danger-pill">bajo</span>' : ""}
         </div>
         <div class="item-meta">
           <span>${formatAmount(item)} / objetivo ${formatNumber(item.target, 1)} ${unitLabel(item.unit)}</span>
-          <span>${item.type === "Mixer" ? formatLiters(itemVolumeMl(item)) + " disponibles" : drinks + " tragos"}</span>
+          <span>${drinks} tragos</span>
           ${mixerNeeded ? `<span>${formatLiters(mixerNeeded)} de ${escapeHtml(item.mixerName)} para mezclar</span>` : ""}
           ${item.location ? `<span class="location-chip">${escapeHtml(item.location)}</span>` : ""}
           <span>hace ${relativeTime(item.updatedAt)}</span>
@@ -521,16 +499,14 @@ function renderPlanner() {
   const rows = [...stats.mixerRows.values()].sort((a, b) => b.neededMl - a.neededMl);
   els.mixBreakdown.innerHTML = rows.length
     ? rows.map((row) => {
-        const gapMl = Math.max(0, row.neededMl - row.availableMl);
-        const coverage = row.neededMl ? Math.min(100, Math.round(row.availableMl / row.neededMl * 100)) : 100;
         return `
           <div class="mix-row">
             <div>
               <strong>${escapeHtml(row.name)}</strong>
-              <span>${formatLiters(row.availableMl)} / ${formatLiters(row.neededMl)}</span>
+              <span>${formatLiters(row.neededMl)} necesarios</span>
             </div>
-            <div class="mini-bar"><span style="width:${coverage}%"></span></div>
-            <em>${gapMl ? "faltan " + formatLiters(gapMl) : "ok"}</em>
+            <div class="mini-bar"><span style="width:100%"></span></div>
+            <em>calcular</em>
           </div>
         `;
       }).join("")
@@ -551,20 +527,9 @@ function getStats() {
   const mixerRows = new Map();
   let totalBottles = 0;
   let totalDrinks = 0;
-  let mixerAvailableMl = 0;
   let mixerNeededMl = 0;
 
   state.items.forEach((item) => {
-    if (item.type === "Mixer") {
-      const availableMl = itemVolumeMl(item);
-      mixerAvailableMl += availableMl;
-      const key = mixerKey(item.name);
-      const row = mixerRows.get(key) || { name: item.name, neededMl: 0, availableMl: 0 };
-      row.availableMl += availableMl;
-      mixerRows.set(key, row);
-      return;
-    }
-
     totalBottles += bottleEquivalent(item);
     totalDrinks += Math.floor(drinkCount(item));
 
@@ -581,15 +546,12 @@ function getStats() {
   return {
     totalBottles,
     totalDrinks,
-    mixerAvailableMl,
     mixerNeededMl,
-    mixerGapMl: Math.max(0, mixerNeededMl - mixerAvailableMl),
     mixerRows
   };
 }
 
 function bottleEquivalent(item) {
-  if (item.type === "Mixer") return 0;
   if (item.unit === "bottles") return item.amount;
   if (item.unit === "liters") return item.amount * 1000 / item.bottleMl;
   if (item.unit === "ml") return item.amount / item.bottleMl;
@@ -598,7 +560,6 @@ function bottleEquivalent(item) {
 }
 
 function drinkCount(item) {
-  if (item.type === "Mixer") return 0;
   if (item.type === "Beer" && (item.unit === "cans" || item.unit === "bottles")) return item.amount;
   if (!item.servingMl) return 0;
   return itemVolumeMl(item) / item.servingMl;
@@ -613,7 +574,7 @@ function itemVolumeMl(item) {
 }
 
 function mixerNeededForItem(item) {
-  if (item.type === "Mixer" || !item.mixerName || !item.mixerMl) return 0;
+  if (!item.mixerName || !item.mixerMl) return 0;
   return Math.floor(drinkCount(item)) * item.mixerMl;
 }
 
@@ -633,11 +594,9 @@ function readinessCopy(score, stats) {
   if (!state.items.length) return "Cargá las reservas y vemos si alcanza.";
   const needed = state.planner.people * state.planner.drinksEach;
   const drinksGap = Math.max(0, needed - stats.totalDrinks);
-  const mixGap = stats.mixerGapMl;
-  if (drinksGap === 0 && mixGap === 0) return "La barra está lista. Hay alcohol y mezcla para bancar la juntada.";
-  if (drinksGap === 0) return `Alcohol sobra, pero falta ${formatLiters(mixGap)} de mezcla.`;
+  if (drinksGap === 0) return `Alcanza para ${needed} tragos planeados. Mezcla estimada: ${formatLiters(stats.mixerNeededMl)}.`;
   if (score >= 60) return `Buen stock, pero faltan ${drinksGap} tragos para el plan.`;
-  return `Está divertido, pero no alcanza: faltan ${drinksGap} tragos y ${formatLiters(mixGap)} de mezcla.`;
+  return `Faltan ${drinksGap} tragos para cubrir la juntada.`;
 }
 
 function formatAmount(item) {
@@ -691,7 +650,7 @@ function sanitizeState(nextState) {
 
 function normalizeState(nextState) {
   return {
-    items: Array.isArray(nextState.items) ? nextState.items.map(normalizeItem) : [],
+    items: Array.isArray(nextState.items) ? nextState.items.map(normalizeItem).filter(Boolean) : [],
     log: Array.isArray(nextState.log) ? nextState.log.map(normalizeLog).filter(Boolean) : [],
     planner: {
       people: positiveNumber(nextState.planner?.people, 8),
@@ -703,6 +662,7 @@ function normalizeState(nextState) {
 
 function normalizeItem(item) {
   const type = normalizeType(item.type);
+  if (type === "Mixer") return null;
   const defaults = DEFAULTS_BY_TYPE[type] || DEFAULTS_BY_TYPE.Other;
   const mixer = inferredMixer(type);
   return {
