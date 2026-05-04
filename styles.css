@@ -256,16 +256,56 @@ h2 {
   place-items: center;
 }
 
+.beer-mug {
+  position: relative;
+  display: inline-block;
+}
+
 .big-glass {
   position: relative;
-  width: clamp(160px, 23vw, 270px);
-  height: clamp(240px, 34vw, 390px);
+  width: clamp(170px, 24vw, 290px);
+  height: clamp(250px, 35vw, 410px);
   overflow: hidden;
-  border: 2px solid rgba(251, 247, 232, 0.45);
-  border-top: 0;
-  border-radius: 18px 18px 46px 46px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-  box-shadow: inset 20px 0 34px rgba(255, 255, 255, 0.06), 0 32px 80px rgba(0, 0, 0, 0.32);
+  border: 3px solid rgba(255, 245, 220, 0.55);
+  border-top-width: 7px;
+  border-radius: 14px 14px 28px 28px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03)),
+    linear-gradient(180deg, rgba(255, 221, 120, 0.08), rgba(255, 171, 52, 0.04));
+  box-shadow:
+    inset 18px 0 28px rgba(255, 255, 255, 0.08),
+    inset -10px 0 18px rgba(0, 0, 0, 0.1),
+    0 32px 80px rgba(0, 0, 0, 0.32);
+}
+
+.big-glass::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 8px;
+  height: 26px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 20% 55%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.55)),
+    linear-gradient(180deg, rgba(255, 250, 235, 0.95), rgba(243, 233, 212, 0.88));
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
+  pointer-events: none;
+}
+
+.beer-handle {
+  position: absolute;
+  top: 26%;
+  right: clamp(-48px, -4vw, -32px);
+  width: clamp(36px, 4vw, 50px);
+  height: clamp(96px, 13vw, 146px);
+  border: 8px solid rgba(255, 245, 220, 0.45);
+  border-left: 0;
+  border-radius: 0 24px 24px 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03));
+  box-shadow:
+    inset -8px 0 10px rgba(255, 255, 255, 0.08),
+    0 10px 24px rgba(0, 0, 0, 0.28);
 }
 
 .glass-fill {
@@ -273,8 +313,8 @@ h2 {
   inset: auto 0 0;
   height: 0;
   background:
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.28), transparent 0.35rem),
-    linear-gradient(180deg, rgba(226, 255, 84, 0.95), rgba(141, 152, 96, 0.9));
+    radial-gradient(circle at 20% 30%, rgba(255, 243, 210, 0.35), transparent 0.35rem),
+    linear-gradient(180deg, rgba(255, 200, 74, 0.96), rgba(202, 120, 28, 0.92));
   transition: height 700ms cubic-bezier(.2, .9, .2, 1);
 }
 
@@ -284,7 +324,7 @@ h2 {
   inset: -12px 0 auto;
   height: 24px;
   border-radius: 50%;
-  background: rgba(251, 247, 232, 0.32);
+  background: rgba(255, 248, 230, 0.75);
   animation: liquidWave 2.8s ease-in-out infinite;
 }
 
