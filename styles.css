@@ -352,8 +352,7 @@ h2 {
 .form-panel,
 .planner-panel,
 .inventory-panel,
-.activity-panel,
-.rules-panel {
+.activity-panel {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
@@ -417,8 +416,7 @@ h2 {
 
 .form-panel,
 .planner-panel,
-.activity-panel,
-.rules-panel {
+.activity-panel {
   padding: 18px;
 }
 
@@ -714,7 +712,7 @@ select:focus {
 
 .lower-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr);
+  grid-template-columns: minmax(280px, 1fr);
   gap: 18px;
   margin-top: 18px;
 }
@@ -738,26 +736,6 @@ select:focus {
 }
 
 .activity-log strong {
-  color: var(--text);
-}
-
-.rules-panel p {
-  color: var(--muted);
-  line-height: 1.55;
-}
-
-.rules-panel code {
-  color: var(--accent);
-}
-
-.mode-list {
-  align-items: stretch;
-  flex-direction: column;
-}
-
-.mode-list span {
-  border-left: 3px solid var(--accent);
-  padding: 8px 0 8px 12px;
   color: var(--text);
 }
 
