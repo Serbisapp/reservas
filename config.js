@@ -1,8 +1,13 @@
-// GitHub Pages can serve this app without any setup. In that default mode,
-// reserves are saved in each browser with localStorage.
-//
-// For true shared editing, replace this file with the contents of
-// config.example.js and add a Firebase Realtime Database config.
 window.RESERVAS_CONFIG = {
-  backend: "local"
+  backend: "firebase",
+  firebase: {
+    apiKey: "AIzaSyAQYkgalVDmv19gYhS1ZXOF2MttOLmUXkg",
+    authDomain: "reservas-518ce.firebaseapp.com",
+    databaseURL: "https://reservas-518ce-default-rtdb.firebaseio.com",
+    projectId: "reservas-518ce",
+    storageBucket: "reservas-518ce.firebasestorage.app",
+    messagingSenderId: "969040641235",
+    appId: "1:969040641235:web:e16800bd107ae22e5ee826"
+  },
+  room: "main"
 };
