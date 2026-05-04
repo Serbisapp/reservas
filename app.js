@@ -120,7 +120,6 @@ const els = {
   type: document.querySelector("#typeInput"),
   unit: document.querySelector("#unitInput"),
   amount: document.querySelector("#amountInput"),
-  target: document.querySelector("#targetInput"),
   bottleMl: document.querySelector("#bottleMlInput"),
   servingMl: document.querySelector("#servingMlInput"),
   location: document.querySelector("#locationInput"),
@@ -177,7 +176,7 @@ function bindEvents() {
 
   els.drinksEach.addEventListener("input", () => {
     state.planner.drinksEach = positiveNumber(els.drinksEach.value, 1);
-    persist("Se actualizó el objetivo de tragos");
+    persist("Se actualizó el plan de tragos");
   });
 
   els.clearLog.addEventListener("click", () => {
@@ -280,13 +279,15 @@ function addLog(text) {
 function saveForm() {
   const defaults = DEFAULTS_BY_TYPE[els.type.value] || DEFAULTS_BY_TYPE.Other;
   const mixer = inferredMixer(els.type.value);
+  const amount = positiveNumber(els.amount.value, 0);
+  const existing = state.items.find((entry) => entry.id === els.editingId.value);
   const item = {
     id: els.editingId.value || crypto.randomUUID(),
     name: els.name.value.trim(),
     type: els.type.value,
     unit: els.unit.value,
-    amount: positiveNumber(els.amount.value, 0),
-    target: positiveNumber(els.target.value, 1),
+    amount,
+    target: positiveNumber(existing?.target, Math.max(amount, 1)),
     bottleMl: positiveNumber(els.bottleMl.value, defaults.bottleMl),
     servingMl: positiveNumber(els.servingMl.value, defaults.servingMl),
     mixerName: mixer.name,
@@ -314,7 +315,6 @@ function resetForm() {
   els.type.value = "Fernet";
   applyTypeDefaults();
   els.amount.value = "1";
-  els.target.value = "2";
   els.saveItem.textContent = "Sumar a la barra";
 }
 
@@ -325,7 +325,6 @@ function applyTypeDefaults() {
 
   if (els.type.value === "Beer") {
     els.unit.value = "cans";
-    els.target.value = "12";
   }
 }
 
@@ -338,7 +337,6 @@ function editItem(id) {
   els.type.value = item.type;
   els.unit.value = item.unit;
   els.amount.value = item.amount;
-  els.target.value = item.target;
   els.bottleMl.value = item.bottleMl;
   els.servingMl.value = item.servingMl;
   els.location.value = item.location || "";
@@ -376,11 +374,7 @@ function renderSummary() {
   const stats = getStats();
   const plannedDrinks = Math.max(1, state.planner.people * state.planner.drinksEach);
   const glassLevel = Math.min(100, Math.round(stats.totalDrinks / plannedDrinks * 100));
-  const readiness = state.items.length
-    ? Math.round(
-        state.items.reduce((sum, item) => sum + Math.min(stockRatio(item), 1), 0) / state.items.length * 100
-      )
-    : 0;
+  const readiness = glassLevel;
 
   els.totalBottles.textContent = formatNumber(stats.totalBottles, 1);
   els.totalDrinks.textContent = stats.totalDrinks.toString();
@@ -417,7 +411,7 @@ function renderInventory() {
   const items = state.items
     .filter((item) => filter === "all" || item.type === filter)
     .filter((item) => [item.name, item.type, TYPE_LABELS[item.type], item.notes, item.location, item.mixerName].join(" ").toLowerCase().includes(search))
-    .sort((a, b) => stockRatio(a) - stockRatio(b) || a.name.localeCompare(b.name));
+    .sort((a, b) => drinkCount(a) - drinkCount(b) || a.name.localeCompare(b.name));
 
   els.stockSubtitle.textContent = `${items.length} visibles, ${state.items.length} cargadas`;
   els.inventoryList.innerHTML = "";
@@ -441,7 +435,7 @@ function renderInventory() {
           ${ratio < 0.35 ? '<span class="danger-pill">bajo</span>' : ""}
         </div>
         <div class="item-meta">
-          <span>${formatAmount(item)} / objetivo ${formatNumber(item.target, 1)} ${unitLabel(item.unit)}</span>
+          <span>${formatAmount(item)}</span>
           <span>${drinks} tragos</span>
           ${mixerNeeded ? `<span>${formatLiters(mixerNeeded)} de ${escapeHtml(item.mixerName)} para mezclar</span>` : ""}
           ${item.location ? `<span class="location-chip">${escapeHtml(item.location)}</span>` : ""}

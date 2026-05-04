@@ -7,7 +7,7 @@ App estática para GitHub Pages que lleva el stock de alcohol de un grupo y esti
 - Tragos disponibles: cerveza cuenta como 1 trago por lata/botella; el resto usa ml por trago.
 - Mezcla necesaria: la app la infiere por tipo, por ejemplo Fernet + Coca o Gin + Tónica.
 - Mezcla: se muestra como cálculo estimado, no como reserva editable.
-- Objetivos de stock, actividad, export/import JSON y link snapshot.
+- Actividad, export/import JSON y link snapshot.
 
 ## GitHub Pages y datos compartidos
 
