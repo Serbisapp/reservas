@@ -362,7 +362,7 @@ function renderSummary() {
 
   els.totalBottles.textContent = formatNumber(stats.totalBottles, 1);
   els.totalDrinks.textContent = stats.totalDrinks.toString();
-  els.totalDrinksHero.textContent = stats.totalDrinks.toString();
+  els.totalDrinksHero.textContent = `${stats.totalDrinks} tragos listos`;
   els.mixGap.textContent = formatLiters(stats.mixerNeededMl);
   els.glassFill.style.height = `${glassLevel}%`;
   els.readinessCopy.textContent = readinessCopy(glassLevel, stats);
