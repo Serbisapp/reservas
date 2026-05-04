@@ -98,16 +98,11 @@ const state = {
 
 const els = {
   syncStatus: document.querySelector("#syncStatus"),
-  readinessScore: document.querySelector("#readinessScore"),
-  readinessFill: document.querySelector("#readinessFill"),
   readinessCopy: document.querySelector("#readinessCopy"),
   totalBottles: document.querySelector("#totalBottles"),
   totalDrinks: document.querySelector("#totalDrinks"),
-  totalDrinksHero: document.querySelector("#totalDrinksHero"),
   mixGap: document.querySelector("#mixGap"),
-  mixHero: document.querySelector("#mixHero"),
   glassFill: document.querySelector("#glassFill"),
-  visualShelf: document.querySelector("#visualShelf"),
   form: document.querySelector("#itemForm"),
   editingId: document.querySelector("#editingId"),
   name: document.querySelector("#nameInput"),
@@ -363,36 +358,12 @@ function renderSummary() {
   const stats = getStats();
   const plannedDrinks = Math.max(1, state.planner.people * state.planner.drinksEach);
   const glassLevel = Math.min(100, Math.round(stats.totalDrinks / plannedDrinks * 100));
-  const readiness = glassLevel;
 
   els.totalBottles.textContent = formatNumber(stats.totalBottles, 1);
   els.totalDrinks.textContent = stats.totalDrinks.toString();
-  els.totalDrinksHero.textContent = stats.totalDrinks.toString();
   els.mixGap.textContent = formatLiters(stats.mixerNeededMl);
-  els.mixHero.textContent = `Mezcla: ${formatLiters(stats.mixerNeededMl)} necesaria`;
-  els.readinessScore.textContent = `${readiness}%`;
-  els.readinessFill.style.width = `${readiness}%`;
   els.glassFill.style.height = `${glassLevel}%`;
-  els.readinessCopy.textContent = readinessCopy(readiness, stats);
-  renderVisualShelf();
-}
-
-function renderVisualShelf() {
-  const topItems = state.items
-    .sort((a, b) => drinkCount(b) - drinkCount(a))
-    .slice(0, 7);
-  const maxDrinks = Math.max(1, ...topItems.map((item) => Math.floor(drinkCount(item))));
-
-  els.visualShelf.innerHTML = "";
-  topItems.forEach((item, index) => {
-    const ratio = Math.floor(drinkCount(item)) / maxDrinks;
-    const bottle = document.createElement("div");
-    bottle.className = `shelf-bottle bottle-${index % 5}`;
-    bottle.style.setProperty("--fill", `${Math.max(8, ratio * 100)}%`);
-    bottle.title = `${item.name}: ${Math.floor(drinkCount(item))} tragos`;
-    bottle.innerHTML = `<span>${Math.floor(drinkCount(item))}</span>`;
-    els.visualShelf.append(bottle);
-  });
+  els.readinessCopy.textContent = readinessCopy(glassLevel, stats);
 }
 
 function renderInventory() {
@@ -477,7 +448,7 @@ function renderPlanner() {
   if (gap === 0) {
     els.plannerCopy.textContent = `${stats.totalDrinks} tragos para ${needed} planeados. Sobran ${surplus}.`;
   } else {
-    els.plannerCopy.textContent = `${stats.totalDrinks} tragos para ${needed} planeados. Faltan ${gap}; compren bebida o bajen expectativas.`;
+    els.plannerCopy.textContent = `${stats.totalDrinks} tragos para ${needed} planeados. Faltan ${gap}.`;
   }
 
   const rows = [...stats.mixerRows.values()].sort((a, b) => b.neededMl - a.neededMl);
@@ -571,12 +542,12 @@ function inferredMixer(type) {
 }
 
 function readinessCopy(score, stats) {
-  if (!state.items.length) return "Cargá las reservas y vemos si alcanza.";
+  if (!state.items.length) return "Cargá reservas para ver disponibilidad.";
   const needed = state.planner.people * state.planner.drinksEach;
   const drinksGap = Math.max(0, needed - stats.totalDrinks);
   if (drinksGap === 0) return `Alcanza para ${needed} tragos planeados. Mezcla estimada: ${formatLiters(stats.mixerNeededMl)}.`;
-  if (score >= 60) return `Buen stock, pero faltan ${drinksGap} tragos para el plan.`;
-  return `Faltan ${drinksGap} tragos para cubrir la juntada.`;
+  if (score >= 60) return `Stock parcial. Faltan ${drinksGap} tragos para el plan.`;
+  return `Faltan ${drinksGap} tragos para cubrir el plan.`;
 }
 
 function formatAmount(item) {
