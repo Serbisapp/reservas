@@ -48,7 +48,6 @@ const sampleState = {
       type: "Fernet",
       unit: "bottles",
       amount: 1.5,
-      target: 3,
       bottleMl: 750,
       servingMl: 60,
       mixerName: "Coca",
@@ -62,7 +61,6 @@ const sampleState = {
       type: "Gin",
       unit: "bottles",
       amount: 2,
-      target: 2,
       bottleMl: 700,
       servingMl: 50,
       mixerName: "Tónica",
@@ -76,7 +74,6 @@ const sampleState = {
       type: "Beer",
       unit: "cans",
       amount: 12,
-      target: 18,
       bottleMl: 473,
       servingMl: 473,
       mixerName: "",
@@ -276,14 +273,12 @@ function saveForm() {
   const defaults = DEFAULTS_BY_TYPE[els.type.value] || DEFAULTS_BY_TYPE.Other;
   const mixer = inferredMixer(els.type.value);
   const amount = positiveNumber(els.amount.value, 0);
-  const existing = state.items.find((entry) => entry.id === els.editingId.value);
   const item = {
     id: els.editingId.value || crypto.randomUUID(),
     name: els.name.value.trim(),
     type: els.type.value,
     unit: els.unit.value,
     amount,
-    target: positiveNumber(existing?.target, Math.max(amount, 1)),
     bottleMl: positiveNumber(els.bottleMl.value, defaults.bottleMl),
     servingMl: positiveNumber(els.servingMl.value, defaults.servingMl),
     mixerName: mixer.name,
@@ -386,10 +381,11 @@ function renderVisualShelf() {
   const topItems = state.items
     .sort((a, b) => drinkCount(b) - drinkCount(a))
     .slice(0, 7);
+  const maxDrinks = Math.max(1, ...topItems.map((item) => Math.floor(drinkCount(item))));
 
   els.visualShelf.innerHTML = "";
   topItems.forEach((item, index) => {
-    const ratio = Math.min(1, stockRatio(item));
+    const ratio = Math.floor(drinkCount(item)) / maxDrinks;
     const bottle = document.createElement("div");
     bottle.className = `shelf-bottle bottle-${index % 5}`;
     bottle.style.setProperty("--fill", `${Math.max(8, ratio * 100)}%`);
@@ -411,9 +407,11 @@ function renderInventory() {
   els.inventoryList.innerHTML = "";
   els.emptyState.hidden = items.length > 0;
 
+  const maxDrinks = Math.max(1, ...items.map((item) => Math.floor(drinkCount(item))));
+
   items.forEach((item) => {
-    const ratio = stockRatio(item);
     const drinks = Math.floor(drinkCount(item));
+    const ratio = drinks / maxDrinks;
     const mixerNeeded = mixerNeededForItem(item);
     const article = document.createElement("article");
     article.className = "reserve-item";
@@ -426,7 +424,6 @@ function renderInventory() {
           <span class="drink-emoji" aria-hidden="true">${TYPE_EMOJIS[item.type] || TYPE_EMOJIS.Other}</span>
           <h3 title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</h3>
           <span class="type-pill">${escapeHtml(TYPE_LABELS[item.type] || item.type)}</span>
-          ${ratio < 0.35 ? '<span class="danger-pill">bajo</span>' : ""}
         </div>
         <div class="item-meta">
           <span>${formatAmount(item)}</span>
@@ -435,7 +432,7 @@ function renderInventory() {
           ${item.location ? `<span class="location-chip">${escapeHtml(item.location)}</span>` : ""}
           <span>hace ${relativeTime(item.updatedAt)}</span>
         </div>
-        <div class="item-progress ${ratio < 0.35 ? "low" : ""}">
+        <div class="item-progress">
           <div style="width: ${Math.min(100, Math.round(ratio * 100))}%"></div>
         </div>
       </div>
@@ -573,10 +570,6 @@ function inferredMixer(type) {
   };
 }
 
-function stockRatio(item) {
-  return item.target > 0 ? item.amount / item.target : 1;
-}
-
 function readinessCopy(score, stats) {
   if (!state.items.length) return "Cargá las reservas y vemos si alcanza.";
   const needed = state.planner.people * state.planner.drinksEach;
@@ -658,7 +651,6 @@ function normalizeItem(item) {
     type,
     unit: ["bottles", "ml", "cans", "liters"].includes(item.unit) ? item.unit : "bottles",
     amount: positiveNumber(item.amount, 0),
-    target: positiveNumber(item.target, type === "Beer" ? 12 : 1),
     bottleMl: positiveNumber(item.bottleMl, defaults.bottleMl),
     servingMl: positiveNumber(item.servingMl, defaults.servingMl),
     mixerName: mixer.name,

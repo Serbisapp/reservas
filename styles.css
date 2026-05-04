@@ -638,8 +638,7 @@ select:focus {
   font-size: 1.05rem;
 }
 
-.type-pill,
-.danger-pill {
+.type-pill {
   flex: 0 0 auto;
   border-radius: 999px;
   padding: 4px 9px;
@@ -652,11 +651,6 @@ select:focus {
 .type-pill {
   color: #11130f;
   background: var(--accent);
-}
-
-.danger-pill {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.14);
 }
 
 .item-meta {
@@ -687,10 +681,6 @@ select:focus {
   border-radius: inherit;
   background: linear-gradient(90deg, var(--ok), var(--accent));
   transition: width 280ms ease;
-}
-
-.item-progress.low div {
-  background: var(--low);
 }
 
 .item-actions {
