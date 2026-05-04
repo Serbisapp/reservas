@@ -101,6 +101,7 @@ const els = {
   readinessCopy: document.querySelector("#readinessCopy"),
   totalBottles: document.querySelector("#totalBottles"),
   totalDrinks: document.querySelector("#totalDrinks"),
+  totalDrinksHero: document.querySelector("#totalDrinksHero"),
   mixGap: document.querySelector("#mixGap"),
   glassFill: document.querySelector("#glassFill"),
   form: document.querySelector("#itemForm"),
@@ -361,6 +362,7 @@ function renderSummary() {
 
   els.totalBottles.textContent = formatNumber(stats.totalBottles, 1);
   els.totalDrinks.textContent = stats.totalDrinks.toString();
+  els.totalDrinksHero.textContent = stats.totalDrinks.toString();
   els.mixGap.textContent = formatLiters(stats.mixerNeededMl);
   els.glassFill.style.height = `${glassLevel}%`;
   els.readinessCopy.textContent = readinessCopy(glassLevel, stats);
